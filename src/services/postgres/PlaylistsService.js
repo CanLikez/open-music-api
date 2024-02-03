@@ -5,9 +5,9 @@ const NotFoundError = require('../../exceptions/NotFoundError');
 const AuthorizationError = require('../../exceptions/AuthorizationError');
 
 class PlaylistService {
-  constructor(collaborationService) {
+  constructor(collaborationsService) {
     this._pool = new Pool();
-    this._collaborationService = collaborationService;
+    this._collaborationsService = collaborationsService;
   }
 
   async addPlaylist({
@@ -69,7 +69,7 @@ class PlaylistService {
         throw error;
       }
       try {
-        await this._collaborationService.verifyCollaborator(playlistId, userId);
+        await this._collaborationsService.verifyCollaborator(playlistId, userId);
       } catch {
         throw error;
       }
@@ -78,15 +78,11 @@ class PlaylistService {
 
   async getPlaylists(owner) {
     const query = {
-      text: `SELECT
-      playlists.id,
-      playlists.name,
-      users.username
-    FROM playlists
-    LEFT JOIN collaborations ON collaborations.playlist_id = playlists.id
-    LEFT JOIN users ON playlists.owner = users.id
-    WHERE playlists.owner = $1 OR collaborations.user_id = $1
-    GROUP BY playlists.id, users.username
+      text: `SELECT playlists.id, playlists.name, users.username 
+      FROM playlists
+      LEFT JOIN users ON playlists.owner = users.id 
+      LEFT JOIN collaborations ON playlists.id = collaborations.playlist_id 
+      WHERE playlists.owner = $1 OR collaborations.user_id = $1
   `,
       values: [owner],
     };
@@ -96,62 +92,34 @@ class PlaylistService {
 
   async getPlaylistSongsById(playlistId) {
     const playlistQuery = {
-      text: `
-          SELECT
-            playlists.id as playlist_id,
-            playlists.name,
-            users.username
-          FROM playlists
-          LEFT JOIN users ON users.id = playlists.owner
-          WHERE playlists.owner = $1
-             OR playlists.id IN (
-                SELECT playlist_id
-                FROM collaborations
-                WHERE user_id = $1
-             );
-        `,
+      text: `SELECT playlists.id, playlists.name, users.username 
+        FROM playlists
+        LEFT JOIN users ON users.id = playlists.owner
+        WHERE playlists.id = $1`,
       values: [playlistId],
     };
 
-    const playlistQueryResult = await this._pool.query(playlistQuery);
+    const playlistResult = await this._pool.query(playlistQuery);
 
-    const songsQuery = {
-      text: `
-          SELECT
-            playlists.id as playlist_id,
-            songs.id as song_id,
-            songs.title,
-            songs.performer
-          FROM playlists
-          LEFT JOIN playlist_songs ON playlists.id = playlist_songs.playlist_id
-          LEFT JOIN songs ON playlist_songs.song_id = songs.id
-          WHERE playlists.id = $1
-             OR playlists.id IN (
-                SELECT playlist_id
-                FROM collaborations
-                WHERE user_id = $1
-             );
-        `,
-      values: [playlistId],
-    };
-
-    const songsQueryResult = await this._pool.query(songsQuery);
-
-    if (!playlistQueryResult.rows.length) {
+    if (!playlistResult.rowCount) {
       throw new NotFoundError('Playlist tidak ditemukan');
     }
 
-    const playlist = playlistQueryResult.rows[0];
-    const songs = songsQueryResult.rows;
+    const playlist = playlistResult.rows[0];
 
-    return {
-      playlist: {
-        id: playlist.playlist_id,
-        name: playlist.name,
-        username: playlist.username,
-        songs,
-      },
+    const songsQuery = {
+      text: `SELECT songs.id, songs.title, songs.performer FROM playlists
+        JOIN playlist_songs ON  playlist_songs.playlist_id = playlists.id
+        JOIN songs ON songs.id = playlist_songs.song_id
+        WHERE playlists.id = $1`,
+      values: [playlistId],
     };
+
+    const result = await this._pool.query(songsQuery);
+
+    playlist.songs = result.rows;
+
+    return playlist;
   }
 
   async deletePlaylistById(playlistId) {
@@ -179,9 +147,7 @@ class PlaylistService {
     }
   }
 
-  async addSongActivities({
-    playlistId, songId, userId, action,
-  }) {
+  async addPlaylistSongActivities(playlistId, { songId, userId, action }) {
     const id = `activities-${nanoid(16)}`;
     const timestamp = new Date().toISOString();
 

@@ -7,7 +7,7 @@ class ActivitiesService {
     this._pool = new Pool();
   }
 
-  async getSongActivities(id) {
+  async getSongActivitiesById(id) {
     const query = {
       text: `SELECT users.username, songs.title, playlist_activities.action, playlist_activities.time FROM playlist_activities
         LEFT JOIN playlists ON playlist_activities.playlist_id = playlists.id

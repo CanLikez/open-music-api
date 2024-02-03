@@ -8,10 +8,12 @@ class CollaborationsHandler {
   async postCollaborationHandler(request, h) {
     this._validator.validateCollaborationPayload(request.payload);
     const { id: credentialId } = request.auth.credentials;
-    const { noteId, userId } = request.payload;
+    const { playlistId, userId } = request.payload;
 
-    await this._playlistService.verifyNoteOwner(noteId, credentialId);
-    const collaborationId = await this._collaborationsService.addCollaboration(noteId, userId);
+    await this._collaborationsService.validateCollaboratorId(userId);
+
+    await this._playlistsService.verifyPlaylistOwner(playlistId, credentialId);
+    const collaborationId = await this._collaborationsService.addCollaboration(playlistId, userId);
 
     const response = h.response({
       status: 'success',
@@ -27,10 +29,10 @@ class CollaborationsHandler {
   async deleteCollaborationHandler(request) {
     this._validator.validateCollaborationPayload(request.payload);
     const { id: credentialId } = request.auth.credentials;
-    const { noteId, userId } = request.payload;
+    const { playlistId, userId } = request.payload;
 
-    await this._playlistService.verifyNoteOwner(noteId, credentialId);
-    await this._collaborationsService.deleteCollaboration(noteId, userId);
+    await this._playlistsService.verifyPlaylistOwner(playlistId, credentialId);
+    await this._collaborationsService.deleteCollaboration(playlistId, userId);
 
     return {
       status: 'success',

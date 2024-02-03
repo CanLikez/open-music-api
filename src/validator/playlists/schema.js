@@ -5,7 +5,7 @@ const PlaylistsPayloadSchema = Joi.object({
 });
 
 const PlaylistSongPayloadSchema = Joi.object({
-  songId: Joi.string().max(60).required(),
+  songId: Joi.string().required(),
 });
 
 module.exports = { PlaylistsPayloadSchema, PlaylistSongPayloadSchema };

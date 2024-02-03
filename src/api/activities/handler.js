@@ -9,7 +9,7 @@ class ActivitiesHandler {
     const { id: credentialId } = request.auth.credentials;
 
     await this._service.verifyPlaylistAccess(playlistId, credentialId);
-    const activities = await this._service.getActivitiesById(playlistId);
+    const activities = await this._service.getSongActivitiesById(playlistId);
     return {
       status: 'success',
       data: {

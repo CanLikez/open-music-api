@@ -35,7 +35,7 @@ class PlaylistsHandler {
     await this._service.addPlaylistSongById(playlistId, songId);
     const action = 'add';
     const time = new Date().toISOString();
-    await this._service.addSongActivities(playlistId, {
+    await this._service.addPlaylistSongActivities(playlistId, {
       songId, userId: credentialId, action, time,
     });
 
@@ -63,10 +63,10 @@ class PlaylistsHandler {
     const { id: credentialId } = request.auth.credentials;
 
     await this._service.verifyPlaylistAccess(playlistId, credentialId);
-    const playlistSong = await this._service.getPlaylistSongsById(playlistId);
+    const playlist = await this._service.getPlaylistSongsById(playlistId);
     return {
       status: 'success',
-      data: { playlistSong },
+      data: { playlist },
     };
   }
 
