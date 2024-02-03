@@ -3,7 +3,6 @@ const { nanoid } = require('nanoid');
 const InvariantError = require('../../exceptions/InvariantError');
 const NotFoundError = require('../../exceptions/NotFoundError');
 const AuthorizationError = require('../../exceptions/AuthorizationError');
-const { mapDBToActivities } = require('../../utils/index');
 
 class PlaylistService {
   constructor(collaborationService) {
@@ -34,7 +33,7 @@ class PlaylistService {
     const id = `playlist-song-${nanoid(16)}`;
 
     const query = {
-      text: 'INSERT INTO playlists_songs VALUES($1, $2, $3) RETURNING id',
+      text: 'INSERT INTO playlist_songs VALUES($1, $2, $3) RETURNING id',
       values: [id, playlistId, songId],
     };
 
@@ -49,7 +48,7 @@ class PlaylistService {
 
   async verifyPlaylistOwner(id, owner) {
     const query = {
-      text: 'SELECT owner FROM playlists WHERE id = $1',
+      text: 'SELECT * FROM playlists WHERE id = $1',
       values: [id],
     };
     const result = await this._pool.query(query);
@@ -155,10 +154,10 @@ class PlaylistService {
     };
   }
 
-  async deletePlaylistById(id) {
+  async deletePlaylistById(playlistId) {
     const query = {
       text: 'DELETE FROM playlists WHERE id = $1 RETURNING id',
-      values: [id],
+      values: [playlistId],
     };
 
     const result = await this._pool.query(query);
@@ -196,24 +195,6 @@ class PlaylistService {
     if (!result.rows[0].id) {
       throw new InvariantError('Gagal membuat aktivitas lagu');
     }
-  }
-
-  async getSongActivities(playlistId) {
-    const query = {
-      text: `SELECT users.username, songs.title, playlist_activities.action, playlist_activities.time FROM playlist_activities
-        LEFT JOIN playlists ON playlist_activities.playlist_id = playlists.id
-        LEFT JOIN songs ON playlist_activities.song_id = songs.id
-        LEFT JOIN users ON playlist_activities.user_id = users.id
-        WHERE playlists.id = $1`,
-      values: [playlistId],
-    };
-    const result = await this._pool.query(query);
-
-    if (!result.rowCount) {
-      throw new NotFoundError('Playlist tidak ditemukan');
-    }
-
-    return result.rows.map(mapDBToActivities);
   }
 }
 

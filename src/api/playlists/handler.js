@@ -30,12 +30,9 @@ class PlaylistsHandler {
     const { songId } = request.payload;
     const { id: credentialId } = request.auth.credentials;
     const { id: playlistId } = request.params;
-
     await this._songsService.getSongById(songId);
     await this._service.verifyPlaylistAccess(playlistId, credentialId);
-
     await this._service.addPlaylistSongById(playlistId, songId);
-
     const action = 'add';
     const time = new Date().toISOString();
     await this._service.addSongActivities(playlistId, {
@@ -73,24 +70,12 @@ class PlaylistsHandler {
     };
   }
 
-  async getActivitiesByIdHandler(request) {
-    const { id: credentialId } = request.auth.credentials;
-    const { id } = request.params;
-    await this._service.verifyPlaylistAccess(id, credentialId);
-    const activities = await this._service.getSongActivities(id);
-
-    return {
-      status: 'success',
-      data: { activities },
-    };
-  }
-
   async deletePlaylistByIdHandler(request) {
-    const { id } = request.params;
+    const { id: playlistId } = request.params;
     const { id: credentialId } = request.auth.credentials;
 
-    await this._service.verifyPlaylistOwner(id, credentialId);
-    this._service.deletePlaylistById(id);
+    await this._service.verifyPlaylistOwner(playlistId, credentialId);
+    this._service.deletePlaylistById(playlistId);
 
     return {
       status: 'success',

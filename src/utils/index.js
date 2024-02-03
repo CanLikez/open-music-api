@@ -38,21 +38,8 @@ const mapDBToUsers = ({
   fullname,
 });
 
-const mapDBToActivities = ({
-  username,
-  title,
-  action,
-  time,
-}) => ({
-  username,
-  title,
-  action,
-  time,
-});
-
 module.exports = {
   mapDBToSongs,
   mapDBToAlbums,
   mapDBToUsers,
-  mapDBToActivities,
 };
