@@ -1,7 +1,7 @@
 class SongsHandler {
-  constructor(service, validator) {
-    this._service = service;
-    this._validator = validator;
+  constructor(songService, songValidator) {
+    this._service = songService;
+    this._validator = songValidator;
   }
 
   async postSongHandler(request, h) {

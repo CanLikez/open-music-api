@@ -26,6 +26,33 @@ const mapDBToAlbums = ({
   year,
 });
 
+const mapDBToUsers = ({
+  id,
+  username,
+  password,
+  fullname,
+}) => ({
+  id,
+  username,
+  password,
+  fullname,
+});
+
+const mapDBToActivities = ({
+  username,
+  title,
+  action,
+  time,
+}) => ({
+  username,
+  title,
+  action,
+  time,
+});
+
 module.exports = {
-  mapDBToSongs, mapDBToAlbums,
+  mapDBToSongs,
+  mapDBToAlbums,
+  mapDBToUsers,
+  mapDBToActivities,
 };
