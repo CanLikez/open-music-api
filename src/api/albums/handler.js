@@ -71,31 +71,28 @@ class AlbumsHandler {
   async postAlbumLikesByIdHandler(request, h) {
     const { id: albumId } = request.params;
     const { id: userId } = request.auth.credentials;
-    await this._validator.validateAlbumLikesPayload({ albumId, userId });
+
     await this._service.checkExistedAlbums(albumId);
 
-    await this._service.getAlbumLikeById(albumId, userId);
-
     await this._service.addAlbumLike(albumId, userId);
-    const response = h.response({
+
+    return h.response({
       status: 'success',
-      message: 'Berhasil menyukai album.',
-    });
-    response.code(201);
-    return response;
+      message: 'Berhasil menyukai album',
+    }).code(201);
   }
 
   async getAlbumLikesByIdHandler(request, h) {
     const { id: albumId } = request.params;
     await this._service.checkExistedAlbums(albumId);
-    const { isCache, likeCount } = await this._service.getAlbumLikesById(albumId);
+    const { cache, likes } = await this._service.getAlbumLikesById(albumId);
     const response = h.response({
       status: 'success',
       data: {
-        likes: likeCount,
+        likes,
       },
     });
-    if (isCache) {
+    if (cache) {
       response.header('X-Data-Source', 'cache');
     }
     return response;
@@ -103,18 +100,16 @@ class AlbumsHandler {
 
   async deleteLikesAlbumByIdhandler(request, h) {
     const { id: albumId } = request.params;
-    const { id: userId } = request.auth.credentials;
+    const { id: credentialId } = request.auth.credentials;
 
-    await this._albumsService.checkExistedAlbums(albumId);
-    await this._albumsService.getAlbumLikeById(albumId, userId);
-    await this._albumsService.deleteAlbumLike(albumId, userId);
+    await this._service.checkExistedAlbums(albumId);
 
-    const response = h.response({
+    await this._service.deleteAlbumLike(albumId, credentialId);
+
+    return h.response({
       status: 'success',
-      message: 'Berhasil membatalkan like album',
-    });
-    response.code(201);
-    return response;
+      message: 'Berhasil membatalkan like',
+    }).code(200);
   }
 }
 

@@ -43,6 +43,14 @@ const routes = (handler) => [
       },
     },
   },
+  {
+    method: 'DELETE',
+    path: '/albums/{id}/likes',
+    handler: (request, h) => handler.deleteLikesAlbumByIdhandler(request, h),
+    options: {
+      auth: 'musicapi_jwt',
+    },
+  },
 ];
 
 module.exports = routes;
