@@ -20,10 +20,12 @@ const mapDBToAlbums = ({
   id,
   name,
   year,
+  cover,
 }) => ({
   id,
   name,
   year,
+  coverUrl: cover,
 });
 
 const mapDBToUsers = ({
