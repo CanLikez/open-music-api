@@ -106,7 +106,7 @@ class AlbumsHandler {
     const { id: userId } = request.auth.credentials;
 
     await this._albumsService.checkExistedAlbums(albumId);
-
+    await this._albumsService.getAlbumLikeById(albumId, userId);
     await this._albumsService.deleteAlbumLike(albumId, userId);
 
     const response = h.response({
