@@ -74,39 +74,46 @@ class AlbumsHandler {
     await this._validator.validateAlbumLikesPayload({ albumId, userId });
     await this._service.checkExistedAlbums(albumId);
 
-    const like = await this._service.getAlbumLikeById(albumId, userId);
+    await this._service.getAlbumLikeById(albumId, userId);
 
-    if (!like) {
-      await this._service.addAlbumLike(albumId, userId);
-      const response = h.response({
-        status: 'success',
-        message: 'Berhasil like album',
-      });
-      response.code(201);
-      return response;
-    }
-
-    await this._service.deleteAlbumLike(albumId, userId);
+    await this._service.addAlbumLike(albumId, userId);
     const response = h.response({
       status: 'success',
-      message: 'Berhasil membatalkan like album',
+      message: 'Berhasil menyukai album.',
     });
     response.code(201);
     return response;
   }
 
   async getAlbumLikesByIdHandler(request, h) {
-    const { id } = request.params;
-    const { likes, source } = await this._service.getAlbumLikesById(id);
-
+    const { id: albumId } = request.params;
+    await this._service.checkExistedAlbums(albumId);
+    const { isCache, likeCount } = await this._service.getAlbumLikesById(albumId);
     const response = h.response({
       status: 'success',
       data: {
-        likes,
+        likes: likeCount,
       },
     });
+    if (isCache) {
+      response.header('X-Data-Source', 'cache');
+    }
+    return response;
+  }
 
-    response.header('X-Data-Source', source);
+  async deleteLikesAlbumByIdhandler(request, h) {
+    const { id: albumId } = request.params;
+    const { id: userId } = request.auth.credentials;
+
+    await this._albumsService.checkExistedAlbums(albumId);
+
+    await this._albumsService.deleteAlbumLike(albumId, userId);
+
+    const response = h.response({
+      status: 'success',
+      message: 'Berhasil membatalkan like album',
+    });
+    response.code(201);
     return response;
   }
 }
