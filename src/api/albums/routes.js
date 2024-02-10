@@ -36,13 +36,19 @@ const routes = (handler) => [
   },
   {
     method: 'GET',
-    path: '/albums/cover/{param*}',
+    path: '/albums/covers/{param*}',
     handler: {
       directory: {
         path: path.join(__dirname, '../uploads/file/images'),
       },
     },
   },
+  /*
+  Pola resource path setelah /albums/. . . sudah digunakan
+  di endpoint GET /albums/{id}. Meskipun works,
+   namun ini bukanlah praktek yang baik. Gunakan path yang belum eksis,
+  misalnya /albums/{id}/covers/{param*} atau /uploads/{param*}.
+  */
   {
     method: 'DELETE',
     path: '/albums/{id}/likes',

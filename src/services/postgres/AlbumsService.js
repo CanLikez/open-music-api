@@ -101,7 +101,13 @@ class AlbumsService {
     };
 
     const result = await this._pool.query(queryLiked);
-
+    /*
+  Agar code menjadi lebih clean, kamu dapat mengekstrak proses query
+  untuk melakukan verifikasi eksistensi album like ke fungsi tersendiri,
+  lalu kamu dapat memanggilnya di handler sebelum pemanggilan fungsi add album like,
+  sehingga fungsi ini hanya melakukan proses query add album like
+  sebagaimana representasi nama fungsinya.
+    */
     if (result.rowCount) {
       throw new ClientError('Gagal memberikan like');
     } else {
@@ -146,7 +152,16 @@ class AlbumsService {
         values: [albumId],
       };
       const { rows } = await this._pool.query(query);
+      /*
+      Kamu dapat mendestructure nilai rowCount untuk mengakses
+      nilai rows affected untuk mengetahui jumlah baris yang dikenai operasi di database.
 
+      contoh:
+
+      const { rows, rowCount } = await this._pool.query(query);
+
+      if (!rowCount) {
+      */
       if (!rows.length) {
         throw new NotFoundError('Album tidak ditemukan');
       }

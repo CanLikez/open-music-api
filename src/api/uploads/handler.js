@@ -11,8 +11,8 @@ class UploadsHandler {
     this._validator.validateAlbumCovers(cover.hapi.headers);
 
     const filename = await this._service.writeFile(cover, cover.hapi, id);
-
-    await this._albumsService.addAlbumCoverById(id, filename);
+    const coverUrl = `http://${process.env.HOST}:${process.env.PORT}/albums/covers/${filename}`;
+    await this._albumsService.addAlbumCoverById(id, coverUrl);
     const response = h.response({
       status: 'success',
       message: 'Sampul berhasil diunggah',
